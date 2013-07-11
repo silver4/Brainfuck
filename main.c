@@ -107,7 +107,6 @@ void exec(Code* const code)
 
 void quit(Code* const code)
 {
-    /*OMG it was hard !*/
     free(code->text);
     free(code);
 }
