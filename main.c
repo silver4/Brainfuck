@@ -61,22 +61,22 @@ int main(int argc,char** argv)
         if(!(error = (source == NULL)))
         {
             char* const text = load(source);
+            fclose(source);
             if(text != NULL)
             {
                 char* stripped = strip(text);
+                free(text);
                 if(stripped != NULL)
                 {
                     Code* code = init(stripped);
+                    free(stripped);
                     if(!(error = (code == NULL)))
                     {
                         exec(code);
                         quit(code);
                     }
-                    free(stripped);
                 }
-                free(text);
             }
-            fclose(source);
         }
         if(error)
         {
