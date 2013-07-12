@@ -1,5 +1,31 @@
 #include "main.h"
 
+char* load(FILE* const source)
+{
+    char buffer[63], *retval = NULL;
+    int quit = 0;
+    size_t i, new;
+    for(i = 0; !quit; i = new)
+    {
+        if(!(quit = (fgets(buffer, sizeof(buffer), source) == NULL)))
+        {
+            char* const tmp = realloc(retval, (new = i + strlen(buffer) + 1));
+            if(tmp != NULL)
+            {
+                retval = tmp;
+                strcpy(retval + i, buffer);
+            }
+            else
+            {
+                free(retval);
+                retval = NULL;
+                quit = 1;
+            }
+        }
+    }
+    return retval;
+}
+
 Code* create(char const* const text)
 {
     Code* retval = calloc(1, sizeof(Code));
@@ -21,20 +47,30 @@ Code* create(char const* const text)
 
 int main(void)
 {
-    /*Files are for later :)*/
-    Code* code = create("++++++++++[>+++++++>++++++++++>+++>+<\
-                         <<<-]>++.>+.+++++++..+++.>++.<<++++++\
-                         +++++++++.>.+++.------.--------.>+.>.");
-    int retval = EXIT_FAILURE;
-    if(code != NULL)
+    int i, retval = EXIT_SUCCESS;
+    for(i = 1; i < argc; ++i)
     {
-        exec(code);
-        quit(code);
-        retval = EXIT_SUCCESS;
-    }
-    else
-    {
-        perror("Error");
+        FILE* source = fopen(argv[i], "r");
+        if(source != NULL)
+        {
+            char* text = load(source);
+            if(text != NULL)
+            {
+                Code* code = init(text);
+                if(code != NULL)
+                {
+                    exec(code);
+                    quit(code);
+                }
+                else
+                {
+                    perror("Error");
+                    retval = EXIT_FAILURE;
+                }
+                free(text);
+            }
+            fclose(source);
+        }
     }
     return retval;
 }
