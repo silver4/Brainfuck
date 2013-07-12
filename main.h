@@ -23,7 +23,7 @@ typedef struct
 
 char* load(FILE* const);
 Code* init(char const* const);
-int main(void);
+int main(int, char**);
 void exec(Code* const);
 void quit(Code* const);
 
