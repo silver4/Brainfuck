@@ -45,31 +45,31 @@ Code* create(char const* const text)
     return retval;
 }
 
-int main(void)
+int main(int argc,char** argv)
 {
     int i, retval = EXIT_SUCCESS;
     for(i = 1; i < argc; ++i)
     {
         FILE* source = fopen(argv[i], "r");
-        if(source != NULL)
+        if(!(error = (source == NULL)))
         {
             char* text = load(source);
             if(text != NULL)
             {
                 Code* code = init(text);
-                if(code != NULL)
+                if(!(error = (code == NULL)))
                 {
                     exec(code);
                     quit(code);
                 }
-                else
-                {
-                    perror("Error");
-                    retval = EXIT_FAILURE;
-                }
                 free(text);
             }
             fclose(source);
+        }
+        if(error)
+        {
+            perror("Error");
+            retval = EXIT_FAILURE;
         }
     }
     return retval;
