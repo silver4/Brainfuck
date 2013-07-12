@@ -21,7 +21,8 @@ typedef struct
     size_t i;
 }Code;
 
-Code* create(char const* const);
+char* load(FILE* const);
+Code* init(char const* const);
 int main(void);
 void exec(Code* const);
 void quit(Code* const);
