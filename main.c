@@ -1,5 +1,6 @@
 #include "main.h"
 
+/*Don't work O.o*/
 char* load(FILE* const source)
 {
     char buffer[63], *retval = NULL;
