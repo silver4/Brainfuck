@@ -22,9 +22,11 @@ typedef struct
 }Code;
 
 char* load(FILE* const);
+char* strip(char const*);
 Code* init(char const* const);
 int main(int, char**);
 void exec(Code* const);
 void quit(Code* const);
+void* srealloc(void*, size_t const);
 
 #endif
