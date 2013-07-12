@@ -1,46 +1,52 @@
 #include "main.h"
 
-/*Don't work O.o*/
 char* load(FILE* const source)
 {
     char buffer[63], *retval = NULL;
     int quit = 0;
     size_t i, new;
-    for(i = 0; !quit; i = new)
+    for(i = 1; !quit; i = new)
     {
         if(!(quit = (fgets(buffer, sizeof(buffer), source) == NULL)))
         {
-            char* const tmp = realloc(retval, (new = i + strlen(buffer) + 1));
-            if(tmp != NULL)
+            retval = srealloc(retval, (new = i + strlen(buffer)));
+            if(!(quit = (retval == NULL)))
             {
-                retval = tmp;
-                strcpy(retval + i, buffer);
-            }
-            else
-            {
-                free(retval);
-                retval = NULL;
-                quit = 1;
+                strcpy(retval + i - 1, buffer);
             }
         }
     }
     return retval;
 }
 
-Code* create(char const* const text)
+char* strip(char const* text)
+{
+    char* retval = NULL;
+    int quit = 0;
+    size_t i;
+    for(i = 0; !quit; ++i)
+    {
+        retval = srealloc(retval, i + 1);
+        if(!(quit = (retval == NULL)))
+        {
+            text = strpbrk(text, "+-><.,[]");
+            retval[i] = (quit = (text == NULL))? '\0': *text;
+            ++text;
+        }
+    }
+    return retval;
+}
+
+Code* init(char const* const text)
 {
     Code* retval = calloc(1, sizeof(Code));
     if(retval != NULL)
     {
         retval->loop.side = 1;
-        if((retval->text = malloc(strlen(text) + 1)) != NULL)
+        retval->text = malloc(strlen(text) + 1);
+        if(retval->text != NULL)
         {
             strcpy(retval->text, text);
-        }
-        else
-        {
-            free(retval);
-            retval = NULL;
         }
     }
     return retval;
@@ -48,20 +54,25 @@ Code* create(char const* const text)
 
 int main(int argc,char** argv)
 {
-    int i, retval = EXIT_SUCCESS;
+    int error = 0, i, retval = EXIT_SUCCESS;
     for(i = 1; i < argc; ++i)
     {
         FILE* source = fopen(argv[i], "r");
         if(!(error = (source == NULL)))
         {
-            char* text = load(source);
+            char* const text = load(source);
             if(text != NULL)
             {
-                Code* code = init(text);
-                if(!(error = (code == NULL)))
+                char* stripped = strip(text);
+                if(stripped != NULL)
                 {
-                    exec(code);
-                    quit(code);
+                    Code* code = init(stripped);
+                    if(!(error = (code == NULL)))
+                    {
+                        exec(code);
+                        quit(code);
+                    }
+                    free(stripped);
                 }
                 free(text);
             }
@@ -147,4 +158,14 @@ void quit(Code* const code)
 {
     free(code->text);
     free(code);
+}
+
+void* srealloc(void* const pointer, size_t const size)
+{
+    void* const retval = realloc(pointer, size);
+    if(retval == NULL)
+    {
+        free(pointer);
+    }
+    return retval;
 }
