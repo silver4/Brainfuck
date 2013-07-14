@@ -22,8 +22,8 @@ typedef struct
 }Code;
 
 char* load(FILE* const);
-char* strip(char const*);
-Code* init(char const* const);
+void strip(char* const);
+Code* init(FILE* const);
 int main(int, char**);
 void exec(Code* const);
 void quit(Code* const);
