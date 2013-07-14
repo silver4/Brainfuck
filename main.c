@@ -54,11 +54,11 @@ Code* init(char const* const text)
 
 int main(int argc,char** argv)
 {
-    int error = 0, i, retval = EXIT_FAILURE;
+    int i, retval = EXIT_FAILURE;
     for(i = 1; i < argc; ++i)
     {
         FILE* source = fopen(argv[i], "r");
-        if(!(error = (source == NULL)))
+        if(source != NULL)
         {
             char* const text = load(source);
             fclose(source);
@@ -70,7 +70,7 @@ int main(int argc,char** argv)
                 {
                     Code* code = init(stripped);
                     free(stripped);
-                    if(!(error = (code == NULL)))
+                    if(code != NULL)
                     {
                         exec(code);
                         quit(code);
