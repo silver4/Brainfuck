@@ -54,7 +54,7 @@ Code* init(char const* const text)
 
 int main(int argc,char** argv)
 {
-    int error = 0, i, retval = EXIT_SUCCESS;
+    int error = 0, i, retval = EXIT_FAILURE;
     for(i = 1; i < argc; ++i)
     {
         FILE* source = fopen(argv[i], "r");
@@ -74,14 +74,10 @@ int main(int argc,char** argv)
                     {
                         exec(code);
                         quit(code);
+                        retval = EXIT_SUCCESS;
                     }
                 }
             }
-        }
-        if(error)
-        {
-            perror("Error");
-            retval = EXIT_FAILURE;
         }
     }
     return retval;
