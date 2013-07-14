@@ -19,34 +19,42 @@ char* load(FILE* const source)
     return retval;
 }
 
-char* strip(char const* text)
+void strip(char* const text)
 {
-    char* retval = NULL;
-    int quit = 0;
-    size_t i;
-    for(i = 0; !quit; ++i)
+    size_t i, cursor = 0;
+    char current;
+    for(i = 0; (current = text[i]) != '\0'; ++i)
     {
-        retval = srealloc(retval, i + 1);
-        if(!(quit = (retval == NULL)))
+        char const* const instruction = "+-><[].,";
+        char tmp;
+        size_t j;
+        for(j = 0; (tmp = instruction[j]) != '\0'; ++j)
         {
-            text = strpbrk(text, "+-><.,[]");
-            retval[i] = (quit = (text == NULL))? '\0': *text;
-            ++text;
+            if(current == tmp)
+            {
+                text[cursor] = tmp;
+                ++cursor;
+            }
         }
     }
-    return retval;
+    text[cursor] = '\0';
 }
 
-Code* init(char const* const text)
+Code* init(FILE* const source)
 {
-    Code* retval = calloc(1, sizeof(Code));
-    if(retval != NULL)
+    Code* retval = NULL;
+    char* const text = load(source);
+    if(text != NULL)
     {
-        retval->loop.side = 1;
-        retval->text = malloc(strlen(text) + 1);
-        if(retval->text != NULL)
+        if((retval = calloc(1, sizeof(Code))) != NULL)
         {
-            strcpy(retval->text, text);
+            strip(text);
+            retval->loop.side = 1;
+            retval->text = text;
+        }
+        else
+        {
+            free(text);
         }
     }
     return retval;
@@ -57,26 +65,16 @@ int main(int argc,char** argv)
     int i, retval = EXIT_FAILURE;
     for(i = 1; i < argc; ++i)
     {
-        FILE* source = fopen(argv[i], "r");
+        FILE* const source = fopen(argv[i], "r");
         if(source != NULL)
         {
-            char* const text = load(source);
+            Code* code = init(source);
             fclose(source);
-            if(text != NULL)
+            if(code != NULL)
             {
-                char* const stripped = strip(text);
-                free(text);
-                if(stripped != NULL)
-                {
-                    Code* code = init(stripped);
-                    free(stripped);
-                    if(code != NULL)
-                    {
-                        exec(code);
-                        quit(code);
-                        retval = EXIT_SUCCESS;
-                    }
-                }
+                exec(code);
+                quit(code);
+                retval = EXIT_SUCCESS;
             }
         }
     }
