@@ -64,7 +64,7 @@ int main(int argc,char** argv)
             fclose(source);
             if(text != NULL)
             {
-                char* stripped = strip(text);
+                char* const stripped = strip(text);
                 free(text);
                 if(stripped != NULL)
                 {
