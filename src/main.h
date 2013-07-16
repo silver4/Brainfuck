@@ -14,12 +14,6 @@ typedef struct
     }memory, text;
 }Code;
 
-typedef struct
-{
-    int skip, side;
-    int unsigned level, current;
-}Loop;
-
 char* load(FILE* const);
 void strip(char* const);
 Code* init(FILE* const);
