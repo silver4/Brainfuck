@@ -9,17 +9,16 @@ typedef struct
 {
     struct
     {
-        int skip, side;
-        int unsigned level, current;
-    }loop;
-    struct
-    {
-        char data[30000];
-        size_t cur;
-    }memory;
-    char* text;
-    size_t i;
+        char* data;
+        size_t i;
+    }memory, text;
 }Code;
+
+typedef struct
+{
+    int skip, side;
+    int unsigned level, current;
+}Loop;
 
 char* load(FILE* const);
 void strip(char* const);
