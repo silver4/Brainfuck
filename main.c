@@ -9,7 +9,7 @@ char* load(FILE* const source)
     {
         if(!(quit = (fgets(buffer, sizeof(buffer), source) == NULL)))
         {
-            retval = srealloc(retval, (new = i + strlen(buffer)));
+            retval = srealloc(retval, new = i + strlen(buffer));
             if(!(quit = (retval == NULL)))
             {
                 strcpy(retval + i - 1, buffer);
@@ -42,19 +42,21 @@ void strip(char* const text)
 
 Code* init(FILE* const source)
 {
-    Code* retval = NULL;
-    char* const text = load(source);
-    if(text != NULL)
+    Code* retval = malloc(sizeof(Code));
+    if(retval != NULL)
     {
-        if((retval = calloc(1, sizeof(Code))) != NULL)
+        retval->text.data = load(source);
+        retval->memory.data = calloc(30000, sizeof(char));
+        if(retval->text.data != NULL && retval->memory.data != NULL)
         {
-            strip(text);
-            retval->loop.side = 1;
-            retval->text = text;
+            strip(retval->text.data);
+            retval->text.i = 0;
+            retval->memory.i = 0;
         }
         else
         {
-            free(text);
+            quit(retval);
+            retval = NULL;
         }
     }
     return retval;
@@ -68,7 +70,7 @@ int main(int argc,char** argv)
         FILE* const source = fopen(argv[i], "r");
         if(source != NULL)
         {
-            Code* code = init(source);
+            Code* const code = init(source);
             fclose(source);
             if(code != NULL)
             {
@@ -83,74 +85,77 @@ int main(int argc,char** argv)
 
 void exec(Code* const code)
 {
-    for(code->i = 0; code->text[code->i] != '\0'; code->i += code->loop.side)
+    Loop loop = {0, 1, 0, 0};
+    for(code->text.i = 0;
+        code->text.data[code->text.i] != '\0';
+        code->text.i += loop.side)
     {
-        if(!code->loop.skip)
+        if(!loop.skip)
         {
-            switch(code->text[code->i])
+            switch(code->text.data[code->text.i])
             {
                 case '+':
-                    ++code->memory.data[code->memory.cur];
+                    ++code->memory.data[code->memory.i];
                     break;
                 case '-':
-                    --code->memory.data[code->memory.cur];
+                    --code->memory.data[code->memory.i];
                     break;
                 case '>':
-                    ++code->memory.cur;
+                    ++code->memory.i;
                     break;
                 case '<':
-                    --code->memory.cur;
+                    --code->memory.i;
                     break;
                 case '.':
-                    putchar(code->memory.data[code->memory.cur]);
+                    putchar(code->memory.data[code->memory.i]);
                     break;
                 case ',':
-                    code->memory.data[code->memory.cur] = getchar();
+                    code->memory.data[code->memory.i] = getchar();
                     break;
                 default:
                     break;
             }
         }
         /*Switch is useless for less than 3 cases*/
-        if(code->text[code->i] == '[')
+        if(code->text.data[code->text.i] == '[')
         {
-            ++code->loop.level;
-            if(code->loop.skip)
+            if(loop.skip)
             {
-                if(code->loop.current == code->loop.level)
+                if(loop.current == loop.level)
                 {
-                    code->loop.skip = !(code->memory.data[code->memory.cur]);
-                    code->loop.side = 1;
+                    loop.skip = !code->memory.data[code->memory.i];
+                    loop.side = 1;
                 }
             }
             else
             {
-                code->loop.skip = !(code->memory.data[code->memory.cur]);
-                code->loop.current = code->loop.level;
+                loop.skip = !code->memory.data[code->memory.i];
+                loop.current = loop.level;
             }
+            ++loop.level;
         }
-        else if(code->text[code->i] == ']')
+        else if(code->text.data[code->text.i] == ']')
         {
-            if(code->loop.current == code->loop.level)
+            --loop.level;
+            if(loop.current == loop.level)
             {
-                if(code->loop.skip)
+                if((loop.skip = code->memory.data[code->memory.i]))
                 {
-                    code->loop.skip = 0;
+                    loop.side = -1;
                 }
-                else if((code->loop.skip = code->memory.data[code->memory.cur]))
+                else
                 {
-                    code->loop.side = -1;
-                    code->loop.current = code->loop.level;
+                    --loop.current;
                 }
             }
-            --code->loop.level;
         }
     }
 }
 
 void quit(Code* const code)
 {
-    free(code->text);
+    free(code->text.data);
+    free(code->memory.data);
     free(code);
 }
 
