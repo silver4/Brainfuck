@@ -85,12 +85,13 @@ int main(int argc,char** argv)
 
 void exec(Code* const code)
 {
-    Loop loop = {0, 1, 0, 0};
+    int skip = 0, side = 1, level = 0, current = -1;
+
     for(code->text.i = 0;
         code->text.data[code->text.i] != '\0';
-        code->text.i += loop.side)
+        code->text.i += side)
     {
-        if(!loop.skip)
+        if(!skip)
         {
             switch(code->text.data[code->text.i])
             {
@@ -119,33 +120,30 @@ void exec(Code* const code)
         /*Switch is useless for less than 3 cases*/
         if(code->text.data[code->text.i] == '[')
         {
-            if(loop.skip)
+            if(current == level)
             {
-                if(loop.current == loop.level)
-                {
-                    loop.skip = !code->memory.data[code->memory.i];
-                    loop.side = 1;
-                }
+                skip = 0;
+                side = 1;
             }
-            else
+            else if(!skip)
             {
-                loop.skip = !code->memory.data[code->memory.i];
-                loop.current = loop.level;
+                skip = !code->memory.data[code->memory.i];
+                ++current;
             }
-            ++loop.level;
+            ++level;
         }
         else if(code->text.data[code->text.i] == ']')
         {
-            --loop.level;
-            if(loop.current == loop.level)
+            --level;
+            if(current == level)
             {
-                if((loop.skip = code->memory.data[code->memory.i]))
+                if((skip = code->memory.data[code->memory.i]))
                 {
-                    loop.side = -1;
+                    side = -1;
                 }
                 else
                 {
-                    --loop.current;
+                    --current;
                 }
             }
         }
