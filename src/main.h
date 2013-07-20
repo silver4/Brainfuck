@@ -15,11 +15,11 @@ typedef struct
 }Code;
 
 char* load(FILE* const);
-void strip(char* const);
+void strip(char*);
 Code* init(FILE* const);
 int main(int, char**);
 void exec(Code* const);
 void quit(Code* const);
-void* srealloc(void*, size_t const);
+void* srealloc(void* const, size_t const);
 
 #endif
