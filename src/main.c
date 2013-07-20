@@ -50,7 +50,6 @@ Code* init(FILE* const source)
         if(retval->text.data != NULL && retval->memory.data != NULL)
         {
             strip(retval->text.data);
-            retval->text.i = 0;
             retval->memory.i = 0;
         }
         else
