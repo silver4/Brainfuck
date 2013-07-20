@@ -19,25 +19,14 @@ char* load(FILE* const source)
     return retval;
 }
 
-void strip(char* const text)
+void strip(char* text)
 {
-    size_t i, cursor = 0;
-    char current;
-    for(i = 0; (current = text[i]) != '\0'; ++i)
+    char* tmp = text;
+    while((text = strpbrk(text, "+-><[].,")) != NULL)
     {
-        char const* const instruction = "+-><[].,";
-        char tmp;
-        size_t j;
-        for(j = 0; (tmp = instruction[j]) != '\0'; ++j)
-        {
-            if(current == tmp)
-            {
-                text[cursor] = tmp;
-                ++cursor;
-            }
-        }
+        *tmp++ = *text++;
     }
-    text[cursor] = '\0';
+    *tmp = '\0';
 }
 
 Code* init(FILE* const source)
@@ -45,9 +34,9 @@ Code* init(FILE* const source)
     Code* retval = malloc(sizeof(Code));
     if(retval != NULL)
     {
-        retval->text.data = load(source);
         retval->memory.data = calloc(30000, sizeof(char));
-        if(retval->text.data != NULL && retval->memory.data != NULL)
+        retval->text.data = load(source);
+        if(retval->memory.data != NULL && retval->text.data != NULL)
         {
             strip(retval->text.data);
             retval->memory.i = 0;
