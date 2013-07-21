@@ -50,7 +50,7 @@ Code* init(FILE* const source)
     return retval;
 }
 
-int main(int argc,char** argv)
+int main(int argc, char** argv)
 {
     int i, retval = EXIT_FAILURE;
     for(i = 1; i < argc; ++i)
